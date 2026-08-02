@@ -1,4 +1,4 @@
-package security;
+package com.generation.blogpessoal.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -24,7 +24,12 @@ public class SecurityConfig {
         "/usuarios/logar",
         "/usuarios/cadastrar",
         "/error/**",
-        "/", "/docs", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**"
+        "/",
+        "/docs",
+        "/swagger-ui/**",
+        "/swagger-ui.html",
+        "/v3/api-docs/**",
+        "/swagger-resources/**"
     };
 
     @Autowired
@@ -54,13 +59,12 @@ public class SecurityConfig {
             )
             
             .exceptionHandling(exceptions -> exceptions
-                    .authenticationEntryPoint((request, response, authException) -> 
-                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, 
-                            "Não autorizado - Token JWT ausente ou inválido"))
+                .authenticationEntryPoint((request, response, authException) -> 
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, 
+                        "Não autorizado - Token JWT ausente ou inválido"))
             )
             
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
             .build();
     }
-    
 }

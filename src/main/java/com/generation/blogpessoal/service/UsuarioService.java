@@ -1,4 +1,4 @@
-package service;
+package com.generation.blogpessoal.service;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,7 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import com.generation.blogpessoal.model.Usuario;
 import com.generation.blogpessoal.model.UsuarioLogin;
 import com.generation.blogpessoal.repository.UsuarioRepository;
-import security.JwtService;
+import com.generation.blogpessoal.security.JwtService;
 
 @Service
 public class UsuarioService {
@@ -59,17 +59,18 @@ public class UsuarioService {
 		
 		Optional<Usuario> usuarioExistente = usuarioRepository.findByUsuario(usuario.getUsuario());
 
-		if(usuarioExistente.isPresent() && !usuarioExistente.get().getId().equals(usuario.getId()))
+		if (usuarioExistente.isPresent() && !usuarioExistente.get().getId().equals(usuario.getId())) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "O e-mail já está em uso!", null);
+		}
 		
 		usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
 
 		return Optional.ofNullable(usuarioRepository.save(usuario));
 	}
 	
-	public Optional<UsuarioLogin> autenticarUsuario(Optional<UsuarioLogin> usuarioLogin){
+	public Optional<UsuarioLogin> autenticarUsuario(Optional<UsuarioLogin> usuarioLogin) {
 		
-		if(usuarioLogin.isEmpty()) {
+		if (usuarioLogin.isEmpty()) {
 			return Optional.empty();
 		}
 		
@@ -77,13 +78,15 @@ public class UsuarioService {
 		
 		try {
 			
-			authenticationManager.authenticate(
-					new UsernamePasswordAuthenticationToken(login.getUsuario(), login.getSenha()));
+			var autenticacao = new UsernamePasswordAuthenticationToken(login.getUsuario(), login.getSenha());
+			
+			authenticationManager.authenticate(autenticacao);
 			
 			return usuarioRepository.findByUsuario(login.getUsuario())
 					.map(usuario -> construirRespostaLogin(login, usuario));
 			
-		}catch(Exception e) {
+		} catch (Exception e) {
+			e.printStackTrace(); // Imprime o log no console da IDE em caso de falha
 			return Optional.empty();
 		}
 	}
