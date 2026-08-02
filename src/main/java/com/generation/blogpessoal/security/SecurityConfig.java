@@ -16,55 +16,62 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import jakarta.servlet.http.HttpServletResponse;
 
-@Configuration
-@EnableWebSecurity
+@Configuration //FAZ A CONFIGURAÇÃO DA SECURITY
+@EnableWebSecurity //SOBRESCREVER A SECURITY PADRÃO
 public class SecurityConfig {
 
+	//DESCREVO ENDPOINTS PÚBLICOS (LIBERADOS DE AUTENTICAÇÃO)
     private static final String[] PUBLIC_ENDPOINTS = {
         "/usuarios/logar",
         "/usuarios/cadastrar",
         "/error/**",
-        "/",
-        "/docs",
-        "/swagger-ui/**",
-        "/swagger-ui.html",
-        "/v3/api-docs/**",
-        "/swagger-resources/**"
+        "/", "/docs", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**" //DOCUMENTAÇÃO DO SISTEMA
     };
 
     @Autowired
     private JwtAuthFilter jwtAuthFilter;
 
+    
+    //RESPONSÁVEL POR CRIPTOGRAFAR A SENHA
+    //BEAN = UNIVERSAL, PODE SER ACESSADO DE QUALQUER LUGAR
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);
     }
 
+    
+    //GERENTE DE AUTENTICAÇÃO, INDICA A ORDEM DOS FILTROS ETC
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
+    
+    //DEFINE COMO A SECURITY VAI FUNCIONAR
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .csrf(csrf -> csrf.disable())
-            .cors(cors -> {})
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) //SESSÃO NÃO GUARDA ESTADO
+            .csrf(csrf -> csrf.disable()) //DESABILITAR PROTEÇÃO CONTRA ATAQUE CSRF (Porque bloqueia post, put, delete. Como usamos JWT, não tem problema desabilitar)
+            .cors(cors -> {/*Aqui posso colocar especificações de endereço, ex o endereço do frontend*/}) //PERMITE REQUISIÇÕES DE FORA DO SERVIDOR PARA A API
             
+            //PERMISSÕES
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                .requestMatchers(HttpMethod.OPTIONS).permitAll()
-                .anyRequest().authenticated()
+                .requestMatchers(PUBLIC_ENDPOINTS).permitAll() //NÃO VALIDA TÓKEN
+                .requestMatchers(HttpMethod.OPTIONS).permitAll() //OPTIONS TMB NÃO EXIGE VALIDAÇÃO
+                .anyRequest().authenticated() //O RESTANTE VAI SER AUTENTICADO
             )
+            
             
             .exceptionHandling(exceptions -> exceptions
-                .authenticationEntryPoint((request, response, authException) -> 
-                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED, 
-                        "Não autorizado - Token JWT ausente ou inválido"))
+                    .authenticationEntryPoint((request, response, authException) -> 
+                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED, 
+                            "Não autorizado - Token JWT ausente ou inválido"))
             )
             
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+            //FILA DE FILTROS
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class) //PRIMEIRO CHECA O TOKEN, DEPOIS O USERNAME PASSWORD
             .build();
     }
+    
 }

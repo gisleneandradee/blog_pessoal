@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,16 +25,27 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/usuarios")
 @CrossOrigin(origins = "*", allowedHeaders = "*")
-public class UsuarioController {
-
+public class UsuarioController {//CUIDA DA INTERAÇÃO COM O USUÁRIO
+	
+	private final AuthenticationManager authenticationManager;
 	@Autowired
 	private UsuarioService usuarioService;
+
 	
+
+
+	UsuarioController(AuthenticationManager authenticationManager) {
+		this.authenticationManager = authenticationManager;
+	}
+	
+	//MÉTODOS GET
+	//1. LISTAR TODOS
 	@GetMapping("/all")
 	public ResponseEntity<List<Usuario>> getAll(){
 		return ResponseEntity.ok(usuarioService.getAll());
 	}
 	
+	//2. LISTAR POR ID
 	@GetMapping("/{id}")
 	public ResponseEntity<Usuario> getById(@PathVariable Long id){
 		return usuarioService.getById(id)
@@ -41,6 +53,8 @@ public class UsuarioController {
 				.orElse(ResponseEntity.notFound().build());
 	}
 	
+	
+	//MÉTODO POST - CADASTRAR
 	@PostMapping("/cadastrar")
 	public ResponseEntity<Usuario> post(@Valid @RequestBody Usuario usuario){
 		return usuarioService.cadastrarUsuario(usuario)
@@ -48,6 +62,8 @@ public class UsuarioController {
 				.orElse(ResponseEntity.badRequest().build());
 	}
 	
+	
+	//MÉTODO PUT - ATUALIZAR
 	@PutMapping("/atualizar")
 	public ResponseEntity<Usuario> put(@Valid @RequestBody Usuario usuario){
 		return usuarioService.atualizarUsuario(usuario)
@@ -61,4 +77,7 @@ public class UsuarioController {
 				.map(resposta -> ResponseEntity.status(HttpStatus.OK).body(resposta))
 				.orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
 	}
+
+	
+	
 }

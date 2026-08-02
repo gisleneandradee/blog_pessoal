@@ -17,60 +17,62 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 
 @Configuration
 public class SwaggerConfig {
-
-    @Bean
+	 
+	@Bean
     OpenAPI springBlogPessoalOpenAPI() {
         return new OpenAPI()
-                .info(new Info()
-                        .title("Projeto Blog Pessoal")
-                        .description("Projeto Blog Pessoal - Gislene Andrade")
-                        .version("v0.0.1")
-                        .license(new License()
-                                .name("Gislene Andrade")
-                                .url("https://github.com/gisleneandradee"))
-                        .contact(new Contact()
-                                .name("Gislene Andrade")
-                                .url("https://github.com/gisleneandradee")
-                                .email("gislene.dev@gmail.com")))
-                .externalDocs(new ExternalDocumentation()
-                        .description("GitHub")
-                        .url("https://github.com/gisleneandradee"))
-                .components(new Components()
-                        .addSecuritySchemes("jwt_auth", createSecurityScheme()))
+            .info(new Info()
+                .title("Projeto Blog Pessoal")
+                .description("Projeto Blog Pessoal - Gislene Andrade")
+                .version("v0.0.1")
+                .license(new License()
+                    .name("Gislene Andrade")
+                    .url("https://github.com/gisleneandradee"))
+                .contact(new Contact()
+                    .name("Gislene Andrade")
+                    .url("https://github.com/gisleneandradee")
+                    .email("gislene.dev@gmail.com")))
+            .externalDocs(new ExternalDocumentation()
+                .description("GitHub")
+                .url("https://github.com/gisleneandradee"))
+            .components(new Components()
+                    .addSecuritySchemes("jwt_auth", createSecurityScheme()))
                 .addSecurityItem(new SecurityRequirement().addList("jwt_auth"));
     }
 
-    @Bean
-    OpenApiCustomizer customerGlobalHeaderOpenApiCustomiser() {
+	@Bean
+	OpenApiCustomizer customerGlobalHeaderOpenApiCustomiser() {
 
-        return openApi -> {
-            openApi.getPaths().values().forEach(pathItem -> pathItem.readOperations().forEach(operation -> {
+		return openApi -> {
+			openApi.getPaths().values().forEach(pathItem -> pathItem.readOperations().forEach(operation -> {
 
-                ApiResponses apiResponses = operation.getResponses();
+				ApiResponses apiResponses = operation.getResponses();
 
-                apiResponses.addApiResponse("200", createApiResponse("Sucesso!"));
-                apiResponses.addApiResponse("201", createApiResponse("Objeto Persistido!"));
-                apiResponses.addApiResponse("204", createApiResponse("Objeto Excluído!"));
-                apiResponses.addApiResponse("400", createApiResponse("Erro na Requisição!"));
-                apiResponses.addApiResponse("401", createApiResponse("Acesso Não Autorizado!"));
-                apiResponses.addApiResponse("403", createApiResponse("Acesso Proibido!"));
-                apiResponses.addApiResponse("404", createApiResponse("Objeto Não Encontrado!"));
-                apiResponses.addApiResponse("500", createApiResponse("Erro na Aplicação!"));
+				apiResponses.addApiResponse("200", createApiResponse("Sucesso!"));
+				apiResponses.addApiResponse("201", createApiResponse("Objeto Persistido!"));
+				apiResponses.addApiResponse("204", createApiResponse("Objeto Excluído!"));
+				apiResponses.addApiResponse("400", createApiResponse("Erro na Requisição!"));
+				apiResponses.addApiResponse("401", createApiResponse("Acesso Não Autorizado!"));
+				apiResponses.addApiResponse("403", createApiResponse("Acesso Proibido!"));
+				apiResponses.addApiResponse("404", createApiResponse("Objeto Não Encontrado!"));
+				apiResponses.addApiResponse("500", createApiResponse("Erro na Aplicação!"));
 
-            }));
-        };
-    }
+			}));
+		};
+	}
 
-    private ApiResponse createApiResponse(String message) {
-        return new ApiResponse().description(message);
-    }
+	private ApiResponse createApiResponse(String message) {
 
-    private SecurityScheme createSecurityScheme() {
-        return new SecurityScheme()
-                .name("jwt_auth")
-                .type(SecurityScheme.Type.HTTP)
-                .scheme("bearer")
-                .bearerFormat("JWT")
-                .description("Insira apenas o token JWT (a palavra 'Bearer' será adicionada automaticamente)");
-    }
+		return new ApiResponse().description(message);
+
+	}
+	
+	private SecurityScheme createSecurityScheme() {
+	    return new SecurityScheme()
+	        .name("jwt_auth")
+	        .type(SecurityScheme.Type.HTTP)
+	        .scheme("bearer")
+	        .bearerFormat("JWT")
+	        .description("Insira apenas o token JWT (a palavra 'Bearer' será adicionada automaticamente)");
+	}
 }

@@ -21,23 +21,26 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
-public class JwtAuthFilter extends OncePerRequestFilter {
-
+public class JwtAuthFilter extends OncePerRequestFilter {//"como se fosse um porteiro"
+//HERDA ONCEPERREQUESTFILTER = PADRÃO PARA CRIAR FILTROS DE SERVER
+//BASICAMENTE CHECA O TOKEN, E DEPOIS COMEÇA A PASSAR PELOS FILTROS
+	
     @Autowired
     private JwtService jwtService;
 
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
+    
     @Override
-    protected void doFilterInternal(HttpServletRequest request, 
-                                    HttpServletResponse response, 
-                                    FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, //LÊ A REQUISIÇÃO PARA ENTENDER SE LA DENTRO TEM UM TOKEN
+                                    HttpServletResponse response, //DEVOLVE UMA RESPOSTA DESSA REQUISIÇÃO
+                                    FilterChain filterChain) throws ServletException, IOException { //FILTERCHAIN É O FILTRO (guarda e cria filtros)
         
-        try {
+        try {//EXTRAIR O TOKEN DE DENTRO DA REQUISIÇÃO
             String token = extractTokenFromRequest(request);
             
-            // Não existe token
+            //NÃO EXISTE TOKEN
             if (token == null || SecurityContextHolder.getContext().getAuthentication() != null) {
                 filterChain.doFilter(request, response);
                 return;
@@ -52,6 +55,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
     }
 
+    
+    //MÉTODO AUXILIAR: LÊ O CABEÇARIO DA REQUISIÇÃO E PEGA APENAS O TOKEN
     private String extractTokenFromRequest(HttpServletRequest request) {
         
     	String authHeader = request.getHeader("Authorization");
@@ -63,28 +68,33 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         return null;
     }
     
+    
     private void processJwtAuthentication(HttpServletRequest request, String token) {
         
+    	//EXTRAIR O NOME DE USUÁRIO DE DENTRO DO TOKEN
     	String username = jwtService.extractUsername(token);
         
+    	//CHECA SE O USUÁRIO ESTÁ AUTENTICADO
         if (username != null && !username.trim().isEmpty()) {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
             
             if (jwtService.validateToken(token, userDetails)) {
             	
+            	//SE O TOKEN FOR LIBERADO, MOSTRA OS DIRETOS DE ACESSO DO USUÁRIO
                 UsernamePasswordAuthenticationToken authToken = 
                     new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 
+                //ADICIONA O TOKEN E LIBERA REQUISIÇÃO
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
                 
-            } else {
+            } else {//SE O TOKEN NÃO FOR LIBERADO (401)
                 throw new RuntimeException("Token JWT inválido ou expirado");
             }
             
-        } else {
+        } else {//SE O USUÁRIO NÃO ESTIVER AUTENTICADO (401)
             throw new RuntimeException("Usuário não pode ser extraído do token JWT");
         }
     }

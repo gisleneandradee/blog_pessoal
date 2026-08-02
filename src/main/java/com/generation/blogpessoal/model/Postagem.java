@@ -2,11 +2,11 @@ package com.generation.blogpessoal.model;
 
 import java.time.LocalDateTime;
 
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,38 +16,46 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-@SuppressWarnings("unused")
-@Entity
-@Table(name = "tb_postagens")
-public class Postagem {
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+//CREATE TABLE tb_postagens();
+@Entity //CRIA UMA TABELA
+@Table(name = "tb_postagens") //DEFINE NOME DA TABELA
+public class Postagem {//MODEL
+
+	//CONSTRAINTS
+	@Id // PRIMARY KEY
+	@GeneratedValue(strategy = GenerationType.IDENTITY) //AUTO_INCREMENT
 	private Long id;
 	
-	@NotBlank(message = "O atributo título é obrigatório")
-	@Size(min = 5, max = 100, message = "O atributo titulo deve conter no mínimo 5 caracteres e no máximo 100")
+	//VALIDAÇÕES DOS ATRIBUTOS:
+	
+	@NotBlank(message = "O atributo título é obrigatório!")
+	@Size(min = 5, max = 100, message = "O atributo título deve ter no mínimo 5 e no máximo 100 caracteres.")
+	@Column(length = 100) //DEFINE TAMANHO VARCHAR NO BD
 	private String titulo;
 	
-	@NotBlank(message = "O atributo texto é obrigatório")
-	@Size(min = 10, max = 1000, message = "O atributo texto deve conter no mínimo 10 caracteres e no máximo 1000")
+	@NotBlank(message = "O atributo texto é obrigatório!")
+	@Size(min = 10, max = 1000, message = "O atributo texto deve ter no mínimo 10 e no máximo 1000 caracteres.")
+	@Column(length = 1000) //DEFINE TAMANHO VARCHAR NO BD
 	private String texto;
 	
-	@UpdateTimestamp
+	@UpdateTimestamp //ATUALIZA A DATA E A HORA NA CRIAÇÃO E ATUALIZAÇÃO DA POSTAGEM
 	private LocalDateTime data;
-	
-	@ManyToOne
-	@JsonIgnoreProperties("postagem")
+
+	//OBJETO DA CLASSE TEMA
+	@ManyToOne //FOREIGN KEY
+	@JsonIgnoreProperties("postagem") //PARA NÃO TER UM LOOP - ao desserializar, ignora a postagem
 	private Tema tema;
 	
-	@ManyToOne
-	@JsonIgnoreProperties("postagem")
+	//OBJETO DA CLASSE USUARIO
+	@ManyToOne //FOREIGN KEY
+	@JsonIgnoreProperties("postagem") //PARA NÃO TER UM LOOP
 	private Usuario usuario;
-
+	
+	
+	//Getters and Setters
 	public Long getId() {
 		return id;
 	}
-
 	public void setId(Long id) {
 		this.id = id;
 	}
@@ -55,7 +63,6 @@ public class Postagem {
 	public String getTitulo() {
 		return titulo;
 	}
-
 	public void setTitulo(String titulo) {
 		this.titulo = titulo;
 	}
@@ -63,7 +70,6 @@ public class Postagem {
 	public String getTexto() {
 		return texto;
 	}
-
 	public void setTexto(String texto) {
 		this.texto = texto;
 	}
@@ -71,23 +77,22 @@ public class Postagem {
 	public LocalDateTime getData() {
 		return data;
 	}
-
 	public void setData(LocalDateTime data) {
 		this.data = data;
 	}
-
+	
+	
 	public Tema getTema() {
 		return tema;
 	}
-
 	public void setTema(Tema tema) {
 		this.tema = tema;
 	}
-
+	
+	
 	public Usuario getUsuario() {
 		return usuario;
 	}
-
 	public void setUsuario(Usuario usuario) {
 		this.usuario = usuario;
 	}
